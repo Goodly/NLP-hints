@@ -32,5 +32,10 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="/Users/manishasharma/Downloads/stanford-ner-2015-12-09/lib/joda-time.jar"/>
+	<classpathentry kind="lib" path="/Users/manishasharma/Downloads/stanford-ner-2015-12-09/lib/jollyday-0.4.7.jar"/>
+	<classpathentry kind="lib" path="/Users/manishasharma/Downloads/stanford-ner-2015-12-09/lib/slf4j-api.jar"/>
+	<classpathentry kind="lib" path="/Users/manishasharma/Downloads/stanford-ner-2015-12-09/lib/slf4j-simple.jar"/>
+	<classpathentry kind="lib" path="/Users/manishasharma/Downloads/stanford-ner-2015-12-09/lib/stanford-ner-resources.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
