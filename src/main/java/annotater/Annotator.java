@@ -1,5 +1,15 @@
 package annotater;
 
+/* Notes: 
+ * - Indexing my char offset 
+ * - What does front end need from me in terms of highlighting appropriate text?
+ * - Should I integrate into django or run Java application
+ * 	- https://docs.python.org/2/library/subprocess.html#popen-constructor
+ * 	- http://stackoverflow.com/questions/21166429/executing-a-java-application-jar-in-django
+ * Flow of click events 
+ * Creating testing classes
+ */
+
 import org.apache.commons.io.FileUtils;
 
 
@@ -68,6 +78,13 @@ public class Annotator {
 	}
 	
 	public String getQuestionType(String question) {
+		/* Returns the question type from checking
+		 * the first word of the question.
+		 * Types: How many
+		 * 		  Where
+		 *        Who
+		 *        When
+		 */
 		String[] split = question.split(" ");
 		String first = Arrays.asList(split).get(0);
 		
@@ -267,23 +284,16 @@ public class Annotator {
 	    					  ));
 	    
 	    
+
 	    for (String q : questions ) {
 			Annotator test = new Annotator(doc, q); 
-			test.extractEntities();
+			test.extractEntities(); // Should call this once only, 
 			String type = test.getQuestionType(q);
 			System.out.println(type);
 			getAnnotations(type);
 			
 	    }
-		
-//		System.out.println("Getting locations...\n-------------------");
-//		test.getLocations();
-//		
-//		System.out.println("\nGetting Persons...\n-------------------");
-//		test.getPersons();
-//		
-//		System.out.println("\nGetting orgs...\n-------------------");
-//		test.getOrgs();
+
 		
 		
 
