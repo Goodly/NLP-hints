@@ -38,5 +38,43 @@
 		<artifactId>xstream</artifactId>
 		<version>1.2.2</version>
 	</dependency>
+	<dependency>
+	    <groupId>com.googlecode.json-simple</groupId>
+	    <artifactId>json-simple</artifactId>
+	    <version>1.1.1</version>
+</dependency>
+<dependency>
+    <groupId>com.sun.xml.stream</groupId>
+    <artifactId>sjsxp</artifactId>
+    <version>1.0.1</version>
+    <exclusions>
+        <exclusion>
+            <groupId>javax.xml.stream</groupId>
+            <artifactId>stax-api</artifactId>
+        </exclusion>
+    </exclusions>
+</dependency>
   </dependencies>
+  
+  <build>
+    <plugins>
+        <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.0.2</version>
+        <configuration>
+                <source>1.6</source>
+                <target>1.6</target>
+        </configuration>
+     </plugin>
+        <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.4.0</version>
+        
+        <configuration>
+             <mainClass>annotator.Annotator</mainClass>
+        </configuration>
+        </plugin>
+    </plugins>
+   </build>
 </project>

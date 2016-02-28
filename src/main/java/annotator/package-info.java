@@ -5,4 +5,4 @@
  * @author manishasharma
  *
  */
-package annotater;
+package annotator;
