@@ -1,29 +1,27 @@
 package annotator;
 
+import java.io.File;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+
 /* Notes: 
  * - Indexing my char offset 
  * Creating testing classes
  */
 
 import org.apache.commons.io.FileUtils;
-
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 import edu.stanford.nlp.ie.AbstractSequenceClassifier;
-import edu.stanford.nlp.ie.crf.*;
+import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.Triple;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-
-import java.io.FileWriter;
-import java.io.IOException;
- 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-
 
 public class Annotator {
 	
@@ -35,12 +33,10 @@ public class Annotator {
 	 */
 	private static HashMap<String, List<Highlight>> entities = new HashMap<String, List<Highlight>>();
 	private static String docStr;
-	private static String question;
+	private static List<String> questionsList;
 	private static String[] docSents;
 	
-	public Annotator(String docString) {
-		docStr = docString;
-		docSents = docStr.split("[.]");
+	public Annotator() {
 		
 		// Initialize entities map
 		entities.put("LOCATION", new ArrayList<Highlight>());
@@ -51,10 +47,16 @@ public class Annotator {
 	
 	public String getdocStr() { return docStr; }
     public String[] getdocSents() { return docSents; }
-    public String getQuestion() { return question; }
+    public List<String> getQuestions() { return questionsList; }
 
 	
-    public void setQuestion(String q) { question = q; }
+    public void populate(List<String> q, String doc) { 
+    	questionsList = q; 
+    	docStr = doc;
+		docSents = docStr.split("[.]");
+}
+    
+    
 	
 	public static List<Highlight> getAnnotations(String QuestionType, String question) {
 		
@@ -253,7 +255,7 @@ public class Annotator {
 		
 		
 			for ( Highlight h : annots ) {
-				indices.add(h.getIndices());	
+				indices.put(h.getIndices());	
 			}
 			
 			obj.put("Indices", indices);
@@ -261,16 +263,68 @@ public class Annotator {
 	 
 			// try-with-resources statement based on post comment below :)
 			//file.write(obj.toJSONString());
-			System.out.print(obj.toJSONString());
+			System.out.print(obj.toString());
 			
 	}
-
+	
+	@SuppressWarnings("resource")
+	public void parseJSON(String inputJsonFile) throws IOException {
+		JSONParser parser = new JSONParser();
+		
+		File file = new File(inputJsonFile);
+	    String jsonStr = FileUtils.readFileToString(file);		
+	    //System.out.println(jsonStr);
+		
+		try {
+			
+			  
+			//Object obj = parser.parse(jsonStr);
+			
+	            JSONArray topics = new JSONArray(jsonStr);
+	            for(int i = 0; i < topics.length(); i++)
+	            {
+	                  JSONObject t = topics.getJSONObject(i);
+	                  String docStr = t.get("Topic Text").toString();
+	                  JSONArray questions = t.getJSONArray("Questions");
+	                  List<String> questionsList = new ArrayList<String>();
+	                  System.out.println(docStr);
+	                  for(int j = 0; j < questions.length(); j++)
+	  	            {
+	                	  JSONObject q = questions.getJSONObject(j);
+	                	  questionsList.add(q.getString("Question"));
+	                	  
+	  	            }
+	                this.populate(questionsList, docStr);
+				
+	            }
+	 
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+		
+	}
+	
 	
 
 	// TESTING 
 	
 	
 	public static void main(String[] args) throws Exception {
+		
+		String inputJsonFile;
+		
+		Annotator test = new Annotator(); 
+		
+		if (args.length == 0) {
+	        System.out.println("Error- please type a string");
+	    } else {
+	        inputJsonFile = args[0];
+	        test.parseJSON(inputJsonFile);
+			test.extractEntities(); // Should call this once only, 
+
+	    }
+		
+		
 		
 		
 	    File file = new File("article.txt");
@@ -282,27 +336,25 @@ public class Annotator {
 	    					  "Where did the protestors plan to march to?",
 	    					  "How many tents were there?",
 	    					  "How many people were arrested?", 
-	    					  "Who ordered the park to be closed?"
-	    					  //"When was camping banned?",
-	    					  //"When did the protest start?"
+	    					  "Who ordered the park to be closed?",
+	    					  "When was camping banned?",
+	    					  "When did the protest start?"
 	    					  ));
 	    
-		Annotator test = new Annotator(doc); 
-		test.extractEntities(); // Should call this once only, 
-		Integer questionId = 1;
 		
-			for (String q : questions) {
-				
-				test.setQuestion(q);
-				String type = test.getQuestionType(q);
-				//System.out.println(type);
-				List<Highlight> annotations = getAnnotations(type, q);
-				if (annotations != null) {
-					createJson(questionId, annotations);
-				}
-				questionId += 1;
-
-			}
+		
+//			for (String q : questions) {
+//				
+//				test.setQuestion(q);
+//				String type = test.getQuestionType(q);
+//				//System.out.println(type);
+//				List<Highlight> annotations = getAnnotations(type, q);
+//				if (annotations != null) {
+//					createJson(questionId, annotations);
+//				}
+//				questionId += 1;
+//
+//			}
 	}
 }
 

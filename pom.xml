@@ -43,16 +43,16 @@
 	    <artifactId>json-simple</artifactId>
 	    <version>1.1.1</version>
 </dependency>
+<dependency> 
+  <groupId>org.slf4j</groupId>
+  <artifactId>slf4j-jdk14</artifactId>
+  <version>1.7.18</version>
+</dependency>
+
 <dependency>
-    <groupId>com.sun.xml.stream</groupId>
-    <artifactId>sjsxp</artifactId>
-    <version>1.0.1</version>
-    <exclusions>
-        <exclusion>
-            <groupId>javax.xml.stream</groupId>
-            <artifactId>stax-api</artifactId>
-        </exclusion>
-    </exclusions>
+	<groupId>org.json</groupId>
+	<artifactId>json</artifactId>
+	<version>20160212</version>
 </dependency>
   </dependencies>
   
@@ -73,6 +73,7 @@
         
         <configuration>
              <mainClass>annotator.Annotator</mainClass>
+             <argument>in.json</argument>
         </configuration>
         </plugin>
     </plugins>
