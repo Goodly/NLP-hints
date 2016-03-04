@@ -8,80 +8,85 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-/* Notes: 
- * - Indexing my char offset 
- * Creating testing classes
- */
 
 import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.json.simple.parser.JSONParser;
+// import org.json.simple.parser.JSONParser;
 
 import edu.stanford.nlp.ie.AbstractSequenceClassifier;
 import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.Triple;
 
+/** Annotator class provides methods to analyze questions given a topic text
+ * and return potential hints in the text.
+ *
+ */
 public class Annotator {
 	
-	/* Annotator Pipeline: 
-	 * (1) Gets Entities
-	 * (2) Classfies Question
-	 * (3) Gets Annotations
-	 * 
-	 */
-	private static HashMap<String, List<Highlight>> entities = new HashMap<String, List<Highlight>>();
-	private static String docStr;
-	private static List<String> questionsList;
-	private static String[] docSents;
+
+	private HashMap<String, List<Highlight>> entities = new HashMap<String, List<Highlight>>();
+	private String docStr;
+	private List<String> questionsList;
+	private String[] docSents;
 	
 	public Annotator() {
 		
+		
 		// Initialize entities map
-		entities.put("LOCATION", new ArrayList<Highlight>());
-		entities.put("PERSON", new ArrayList<Highlight>());
-		entities.put("ORGANIZATION", new ArrayList<Highlight>());
+		this.entities.put("LOCATION", new ArrayList<Highlight>());
+		this.entities.put("PERSON", new ArrayList<Highlight>());
+		this.entities.put("ORGANIZATION", new ArrayList<Highlight>());
 		
 	}
 	
-	public String getdocStr() { return docStr; }
-    public String[] getdocSents() { return docSents; }
-    public List<String> getQuestions() { return questionsList; }
+	public String getdocStr() { return this.docStr; }
+    public String[] getdocSents() { return this.docSents; }
+    public List<String> getQuestions() { return this.questionsList; }
 
 	
     public void populate(List<String> q, String doc) { 
-    	questionsList = q; 
-    	docStr = doc;
-		docSents = docStr.split("[.]");
+    	/* Populate class variables */
+    	this.questionsList = q; 
+    	this.docStr = doc;
+		this.docSents = docStr.split("[.]");
 }
     
-    
 	
-	public static List<Highlight> getAnnotations(String QuestionType, String question) {
+	public List<Highlight> getAnnotations(String question) {
+		/* Calls question helper functions.
+		 * 
+		 * Uses the entity extractor to extract the correct
+		 * type of entity (Location, person) for where and
+		 * who question types.  */
 		
-		if (QuestionType.equals("Where")) {
+		String type = getQuestionType(question);
+		
+		if (type.equals("Where")) {
 			return getLocations();
 		}
 		
-		if (QuestionType.equals("Who")) {
+		if (type.equals("Who")) {
 			return getPersons();
 		}
 		
-		if (QuestionType.equals("How many")) {
+		if (type.equals("How many")) {
 			return getHowMany(question);
 		}
 		
 //		if (QuestionType.equals("When")) {
 //			// Integrate Heideltime parse tags here
 //			return ;
+		
 //		}
+		
 		return null;
 		
 		
 	}
 	
-	public String getQuestionType(String question) {
+	public static String getQuestionType(String question) {
 		/* Returns the question type from checking
 		 * the first word of the question.
 		 * Types: How many
@@ -110,22 +115,23 @@ public class Annotator {
 		
 	}
 	
-	public static List<Highlight> getHowMany(String question) {
+	public List<Highlight> getHowMany(String question) {
+		/* Gets noun from "How many [ noun ] are there?" 
+		 * structure and checks if the previous word in the noun
+		 * is a number.
+		 */
+		
 		String[] split = question.split(" ");
 		List<Highlight> result = new ArrayList<Highlight>();
 		
 		
 		String noun = Arrays.asList(split).get(2);
-		// System.out.println(noun);
 		
 		Integer startIndex = 0;
 		Integer endIndex;
 		
 
-		for (String sent : docSents) {
-			//System.out.println(sent);
-			// System.out.println(startIndex);
-
+		for (String sent : this.docSents) {
 			String[] sentSplit = sent.split(" ");
 			List<String> sentStr = Arrays.asList(sentSplit);
 			for (String word : sentStr) {
@@ -133,30 +139,21 @@ public class Annotator {
 					Integer indexOf = sentStr.indexOf(word);
 					String checkNum = sentStr.get(indexOf - 1);
 					// Store sent string index for the word prior
-					Integer num;
 					try {
-						// System.out.println(checkNum);
-					    num = Integer.parseInt(checkNum);
-					    //Integer indexOfNum = sentStr.indexOf(checkNum);
-					    startIndex = docStr.indexOf(checkNum + " " + noun);
+					    startIndex = this.docStr.indexOf(checkNum + " " + noun);
 					    endIndex = startIndex + checkNum.length() + noun.length() + 1;
 					    List<Integer> indices = Arrays.asList(startIndex, endIndex);
 					    Highlight h = new Highlight(checkNum + new String(" ") + noun, indices);
 					    result.add(h);
-					    //System.out.println("Checking Indices..");
-					    //System.out.println(docStr.substring(startIndex, endIndex));
-					    
+					  
 					      
 					} catch (NumberFormatException e) {
-					    // System.out.print("NumberFormatException Error");  
 						if (isNumber(checkNum)) {
-							// System.out.println("Found num");
-							  startIndex = docStr.indexOf(checkNum + " " + noun);
+							  startIndex = this.docStr.indexOf(checkNum + " " + noun);
 							  endIndex = startIndex + checkNum.length() + noun.length() + 1; 
 							  result.add(new Highlight(checkNum + new String(" ") + noun,  
 						    	       Arrays.asList(startIndex, endIndex)));
-							  //System.out.println("Checking Indices..");
-							  //System.out.println(docStr.substring(startIndex, endIndex));
+							  
 						}
 						else {
 							continue;
@@ -206,29 +203,24 @@ public class Annotator {
 	       	
 	}
 	
-	public static List<Highlight> getLocations() {
-		
-// For Testing
-//		List<Highlight> locations = 
-//		for (Highlight ent : locations) {
-//			System.out.print("Location: " + ent.getHighlight() + ", Indices: ");
-//			System.out.println(ent.getIndices());
-//			
-//		}
-		
-		return entities.get("LOCATION");
+	public List<Highlight> getLocations() {		
+		return this.entities.get("LOCATION");
 	}
 	
-	public static List<Highlight> getPersons() {		
-		return entities.get("PERSON");
+	public List<Highlight> getPersons() {		
+		return this.entities.get("PERSON");
 	}
 	
 	public List<Highlight> getOrgs() {
-		return entities.get("ORGANIZATION");
+		return this.entities.get("ORGANIZATION");
 		
 	}
 	
 	public void extractEntities() throws Exception {
+		/* Uses CoreNLP Named Entity Recognizer to extract all entities from topic text
+		 * and stores them in an entities dictionary
+		 */
+		
 		String serializedClassifier = "ner-classifiers/english.all.3class.distsim.crf.ser.gz";
 
 	    AbstractSequenceClassifier<CoreLabel> classifier = CRFClassifier.getClassifier(serializedClassifier);
@@ -245,35 +237,54 @@ public class Annotator {
 	    }
 	 } 
 		
-	@SuppressWarnings("unchecked")
-	public static void createJson(Integer qID, List<Highlight> annots) throws IOException {
-		JSONObject obj = new JSONObject();
-		obj.put("qID", qID);
+	public static ArrayList<JSONObject> createJson(Annotator annotObj) throws IOException {
+		
+		/* Retrieves annotations for an topic annotator object and 
+		 * creates corresponding JSONObject for that topic */ 
+		ArrayList<JSONObject> all = new ArrayList<JSONObject>();
+		Integer qID = 1;
+		for ( String q : annotObj.getQuestions()) {
+			List<Highlight> annots = annotObj.getAnnotations(q);
+			if (annots != null) {
+				JSONObject obj = new JSONObject();
+				obj.put("qID", qID);
 
- 
-		JSONArray indices = new JSONArray();
-		
-		
-			for ( Highlight h : annots ) {
-				indices.put(h.getIndices());	
+		 
+				JSONArray indices = new JSONArray();
+				JSONArray highlights = new JSONArray();
+				
+				
+				for ( Highlight h : annots ) {
+					indices.put(h.getIndices());
+					highlights.put(h.getHighlight());
+				}
+					
+				
+				if  (!(indices.length() == 0)) {
+					obj.put("Indices", indices);
+					obj.put("Highlights", highlights);
+					all.add(obj);
+				}
+				
 			}
-			
-			obj.put("Indices", indices);
-	
-	 
-			// try-with-resources statement based on post comment below :)
-			//file.write(obj.toJSONString());
-			System.out.print(obj.toString());
-			
+			qID += 1;
+
+		}
+		
+		return all;
+		
 	}
 	
-	@SuppressWarnings("resource")
-	public void parseJSON(String inputJsonFile) throws IOException {
-		JSONParser parser = new JSONParser();
+	public static List<Annotator> parseJSON(String inputJsonFile) throws IOException {
+		/* Parses Input JSON File */
+		
+		//JSONParser parser = new JSONParser();
 		
 		File file = new File(inputJsonFile);
 	    String jsonStr = FileUtils.readFileToString(file);		
 	    //System.out.println(jsonStr);
+	    
+	    List<Annotator> result = new ArrayList<Annotator>();
 		
 		try {
 			
@@ -281,90 +292,93 @@ public class Annotator {
 			//Object obj = parser.parse(jsonStr);
 			
 	            JSONArray topics = new JSONArray(jsonStr);
+
 	            for(int i = 0; i < topics.length(); i++)
 	            {
+	        		  Annotator res = new Annotator(); 
+
 	                  JSONObject t = topics.getJSONObject(i);
 	                  String docStr = t.get("Topic Text").toString();
 	                  JSONArray questions = t.getJSONArray("Questions");
 	                  List<String> questionsList = new ArrayList<String>();
-	                  System.out.println(docStr);
 	                  for(int j = 0; j < questions.length(); j++)
 	  	            {
 	                	  JSONObject q = questions.getJSONObject(j);
 	                	  questionsList.add(q.getString("Question"));
 	                	  
 	  	            }
-	                this.populate(questionsList, docStr);
+	                res.populate(questionsList, docStr);
+	                res.extractEntities();
+	                
 				
+	                result.add(res);
 	            }
 	 
 	        } catch (Exception e) {
 	            e.printStackTrace();
 	        }
 		
+
+		
+		return result;
+		
+	}
+	
+	
+	public static void getAllHints(List<Annotator> objs) throws IOException {
+		/* Prints resulting JSON to stdout.
+		 * Creates JSON objects for each topic
+		 */
+		JSONArray all = new JSONArray();
+		Integer topicID = 1;
+		for (Annotator a : objs) {
+				
+			JSONObject topic = new JSONObject();
+			topic.put("topicID", topicID);
+			topic.put("Hints",  createJson(a));
+			all.put(topic);
+			
+			topicID ++;
+			
+		}
+		
+		System.out.println(all);
+		// Output Json
 	}
 	
 	
 
-	// TESTING 
 	
 	
 	public static void main(String[] args) throws Exception {
 		
 		String inputJsonFile;
 		
-		Annotator test = new Annotator(); 
 		
 		if (args.length == 0) {
 	        System.out.println("Error- please type a string");
 	    } else {
 	        inputJsonFile = args[0];
-	        test.parseJSON(inputJsonFile);
-			test.extractEntities(); // Should call this once only, 
+	        List<Annotator> obs = parseJSON(inputJsonFile);
+	        getAllHints(obs);
+	
 
 	    }
 		
 		
-		
-		
-	    File file = new File("article.txt");
-	    String doc = FileUtils.readFileToString(file);
-	    
-	    // Questions based on article.txt
-	    List<String> questions = new ArrayList<String>(
-	    		Arrays.asList("Where did the protest start?",
-	    					  "Where did the protestors plan to march to?",
-	    					  "How many tents were there?",
-	    					  "How many people were arrested?", 
-	    					  "Who ordered the park to be closed?",
-	    					  "When was camping banned?",
-	    					  "When did the protest start?"
-	    					  ));
 	    
 		
-		
-//			for (String q : questions) {
-//				
-//				test.setQuestion(q);
-//				String type = test.getQuestionType(q);
-//				//System.out.println(type);
-//				List<Highlight> annotations = getAnnotations(type, q);
-//				if (annotations != null) {
-//					createJson(questionId, annotations);
-//				}
-//				questionId += 1;
-//
-//			}
 	}
 }
 
 
+/** Highlight Wrapper class to hold
+ * Highlight strings and indices in
+ * sentence.
+ */
 
 class Highlight {
-	/* Highlight Wrapper class to hold
-	 * Highlight strings and indices in
-	 * sentence.
-	 */
+	
 
 	public Highlight() {}
 	
