@@ -1,6 +1,8 @@
 
 # Text Thresher Hints
 
+NLP-Hints uses nlp techniques such as named entity recognition to provide hints to questions about the selected text in the Text Thresher Interface.
+
 #### Running Annotator.java.
 
 ```
