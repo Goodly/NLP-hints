@@ -22,6 +22,10 @@ import edu.stanford.nlp.util.Triple;
 
 /** Annotator class provides methods to analyze questions given topic text
  *  and return potential hints in the text.
+=======
+/** Annotator class provides methods to analyze questions given a topic text
+ * and return potential hints in the text.
+>>>>>>> 7bdb5b4b80837b464b7fa283f6ba8a5417d5a6aa
  *
  */
 public class Annotator {
@@ -33,6 +37,7 @@ public class Annotator {
 	private List<String> docSents;
 	
 	public Annotator() {
+		
 		
 		// Initialize entities map
 		this.entities.put("LOCATION", new ArrayList<Highlight>());
@@ -74,6 +79,7 @@ public class Annotator {
     	
     	return docSents;
     }
+
     
 	
 	public List<Highlight> getAnnotations(String question) {
@@ -84,6 +90,7 @@ public class Annotator {
 		 * who question types.  */
 		
 		String type = getQuestionType(question);
+
 		
 		if (type.equals("Where")) {
 			return getLocations();
@@ -270,7 +277,6 @@ public class Annotator {
 			if (annots != null) {
 				JSONObject obj = new JSONObject();
 				obj.put("qID", qID);
-
 		 
 				JSONArray indices = new JSONArray();
 				JSONArray highlights = new JSONArray();
