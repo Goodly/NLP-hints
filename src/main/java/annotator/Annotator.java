@@ -3,11 +3,12 @@ package annotator;
 import java.io.File;
 
 import java.io.IOException;
+import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-
+import java.util.Locale;
 
 import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
@@ -19,8 +20,8 @@ import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.Triple;
 
-/** Annotator class provides methods to analyze questions given a topic text
- * and return potential hints in the text.
+/** Annotator class provides methods to analyze questions given topic text
+ *  and return potential hints in the text.
  *
  */
 public class Annotator {
@@ -29,10 +30,9 @@ public class Annotator {
 	private HashMap<String, List<Highlight>> entities = new HashMap<String, List<Highlight>>();
 	private String docStr;
 	private List<String> questionsList;
-	private String[] docSents;
+	private List<String> docSents;
 	
 	public Annotator() {
-		
 		
 		// Initialize entities map
 		this.entities.put("LOCATION", new ArrayList<Highlight>());
@@ -42,7 +42,7 @@ public class Annotator {
 	}
 	
 	public String getdocStr() { return this.docStr; }
-    public String[] getdocSents() { return this.docSents; }
+    public List<String> getdocSents() { return this.docSents; }
     public List<String> getQuestions() { return this.questionsList; }
 
 	
@@ -50,8 +50,30 @@ public class Annotator {
     	/* Populate class variables */
     	this.questionsList = q; 
     	this.docStr = doc;
-		this.docSents = docStr.split("[.]");
+		this.docSents = getSentences(this.docStr);
+
+		
+		
 }
+    
+    public static List<String> getSentences(String s) {
+    	
+    	/* Uses the BreakIterator Class to locate boundaries between sentences
+    	 * and returns a list of sentences strings */
+    	
+    	BreakIterator iterator = BreakIterator.getSentenceInstance(Locale.US);
+    	List<String> docSents = new ArrayList<String>();
+    	//String test = "This is a test. This is a T.L.A. test. Now with a Dr. in it.";
+    	iterator.setText(s);
+    	int start = iterator.first();
+    	for (int end = iterator.next();
+    	    end != BreakIterator.DONE;
+    	    start = end, end = iterator.next()) {
+    	  docSents.add(s.substring(start,end));
+    	}
+    	
+    	return docSents;
+    }
     
 	
 	public List<Highlight> getAnnotations(String question) {
