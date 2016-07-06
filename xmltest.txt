@@ -1,0 +1,2 @@
+In Washington <TIMEX3 tid="t1" TYPE="DATE" VAL="PRESENT_REF" temporalFunction="true" valueFromFunction="tf1" anchorTimeID="t0">today</TIMEX3>, the Federal Aviation Administration released air traffic control tapes from the night the TWA Flight eight hundred went down.
+

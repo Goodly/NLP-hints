@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
@@ -17,16 +18,25 @@ import org.json.JSONObject;
 
 import edu.stanford.nlp.ie.AbstractSequenceClassifier;
 import edu.stanford.nlp.ie.crf.CRFClassifier;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.pipeline.Annotation;
+import edu.stanford.nlp.pipeline.AnnotationPipeline;
+import edu.stanford.nlp.pipeline.POSTaggerAnnotator;
+import edu.stanford.nlp.pipeline.TokenizerAnnotator;
+import edu.stanford.nlp.pipeline.WordsToSentencesAnnotator;
+import edu.stanford.nlp.time.TimeAnnotations;
+import edu.stanford.nlp.time.TimeAnnotator;
+import edu.stanford.nlp.time.TimeExpression;
+import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Triple;
+
+
+import edu.stanford.nlp.pipeline.*;
+import edu.stanford.nlp.time.*;
 
 /** Annotator class provides methods to analyze questions given topic text
  *  and return potential hints in the text.
-=======
-/** Annotator class provides methods to analyze questions given a topic text
- * and return potential hints in the text.
->>>>>>> 7bdb5b4b80837b464b7fa283f6ba8a5417d5a6aa
- *
  */
 public class Annotator {
 	
@@ -43,6 +53,8 @@ public class Annotator {
 		this.entities.put("LOCATION", new ArrayList<Highlight>());
 		this.entities.put("PERSON", new ArrayList<Highlight>());
 		this.entities.put("ORGANIZATION", new ArrayList<Highlight>());
+		this.entities.put("TIME", new ArrayList<Highlight>());
+		
 		
 	}
 	
@@ -57,8 +69,6 @@ public class Annotator {
     	this.docStr = doc;
 		this.docSents = getSentences(this.docStr);
 
-		
-		
 }
     
     public static List<String> getSentences(String s) {
@@ -104,11 +114,11 @@ public class Annotator {
 			return getHowMany(question);
 		}
 		
-//		if (QuestionType.equals("When")) {
-//			// Integrate Heideltime parse tags here
-//			return ;
+		if (type.equals("When")) {
+			// Integrate Heideltime parse tags here
+			return getTimeTags(this.docSents);
 		
-//		}
+		}
 		
 		return null;
 		
@@ -144,6 +154,10 @@ public class Annotator {
 		
 	}
 	
+	public static String removePunc(String x) {
+	    return x.replaceAll("[^a-zA-Z]", "");
+	}
+	
 	public List<Highlight> getHowMany(String question) {
 		/* Gets noun from "How many [ noun ] are there?" 
 		 * structure and checks if the previous word in the noun
@@ -164,7 +178,7 @@ public class Annotator {
 			String[] sentSplit = sent.split(" ");
 			List<String> sentStr = Arrays.asList(sentSplit);
 			for (String word : sentStr) {
-				if (word.equals(noun)) {
+				if (removePunc(word).equals(noun)) {
 					Integer indexOf = sentStr.indexOf(word);
 					String checkNum = sentStr.get(indexOf - 1);
 					// Store sent string index for the word prior
@@ -202,6 +216,8 @@ public class Annotator {
 
 	public static boolean isNumber(String input) {
 	    
+		System.out.println("Is Number" + input);
+
 	    List<String> allowedStrings = Arrays.asList
 	    		
 	    (
@@ -231,6 +247,42 @@ public class Annotator {
 	    return true;
 	       	
 	}
+	
+	
+	  public static List<Highlight> getTimeTags(List<String> array) {
+		    Properties props = new Properties();
+		    AnnotationPipeline pipeline = new AnnotationPipeline();
+		    pipeline.addAnnotator(new TokenizerAnnotator(false));
+		    pipeline.addAnnotator(new WordsToSentencesAnnotator(false));
+		    pipeline.addAnnotator(new POSTaggerAnnotator(false));
+		    pipeline.addAnnotator(new TimeAnnotator("sutime", props));
+		    
+		    List<Highlight> timeTags = new ArrayList<Highlight>();
+
+		    for (String text : array) {
+		      Annotation annotation = new Annotation(text);
+		      annotation.set(CoreAnnotations.DocDateAnnotation.class, "2013-07-14");
+		      pipeline.annotate(annotation);
+//		      System.out.println(annotation.get(CoreAnnotations.TextAnnotation.class)); // Sentences
+		      List<CoreMap> timexAnnsAll = annotation.get(TimeAnnotations.TimexAnnotations.class);
+		      for (CoreMap cm : timexAnnsAll) {
+		        List<CoreLabel> tokens = cm.get(CoreAnnotations.TokensAnnotation.class);
+		        
+		        // PRINT STATEMENTS
+//		        System.out.println(cm + " [from char offset " +
+//		            tokens.get(0).get(CoreAnnotations.CharacterOffsetBeginAnnotation.class) +
+//		            " to " + tokens.get(tokens.size() - 1).get(CoreAnnotations.CharacterOffsetEndAnnotation.class) + ']' +
+//		            " --> " + cm.get(TimeExpression.Annotation.class).getTemporal());
+		        List<Integer> indices = Arrays.asList(tokens.get(0).get(CoreAnnotations.CharacterOffsetBeginAnnotation.class),
+		        		tokens.get(tokens.size() - 1).get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
+		        Highlight time = new Highlight(cm.toString(), indices);
+		        timeTags.add(time);
+		        
+		      }
+		    }
+		    return timeTags;
+		  }
+		  
 	
 	public List<Highlight> getLocations() {		
 		return this.entities.get("LOCATION");
@@ -393,11 +445,10 @@ public class Annotator {
 
 	    }
 		
-		
-	    
-		
 	}
-}
+
+
+} // closing bracket for Annotator Class
 
 
 /** Highlight Wrapper class to hold
@@ -414,6 +465,7 @@ class Highlight {
 	       this.highlight = highlight;
 	       this.indices = indices;
 	    }
+	
 	private String highlight;
 	private List<Integer> indices;
 	

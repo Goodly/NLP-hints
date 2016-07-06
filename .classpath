@@ -37,5 +37,6 @@
 	<classpathentry kind="lib" path="/Users/manishasharma/Downloads/stanford-ner-2015-12-09/lib/slf4j-api.jar"/>
 	<classpathentry kind="lib" path="/Users/manishasharma/Downloads/stanford-ner-2015-12-09/lib/slf4j-simple.jar"/>
 	<classpathentry kind="lib" path="/Users/manishasharma/Downloads/stanford-ner-2015-12-09/lib/stanford-ner-resources.jar"/>
+	<classpathentry kind="lib" path="/Users/manishasharma/Downloads/stanford-english-corenlp-2016-01-10-models.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

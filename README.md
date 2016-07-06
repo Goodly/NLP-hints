@@ -3,12 +3,23 @@
 
 NLP-Hints uses nlp techniques such as named entity recognition to provide hints to questions about the selected text in the Text Thresher Interface.
 
+## Setup (for Heideltime)
+
+In configs.props, set the path to TreeTagger home directory which is used in heideltime. This is currently what it looks like for me.  
+
+```
+treeTaggerHome = /Users/manishasharma/Desktop/temp-tagger/heideltime-standalone/
+```
+
+
 #### Running Annotator.java.
 
 ```
 mvn compile
 mvn -q exec:java -Dexec.mainClass="annotator.Annotator" > out.json -Dexec.args="in.json"
 ```
+
+127.001:5000/api/hints 
 
 #### Example Input
 
@@ -31,9 +42,6 @@ mvn -q exec:java -Dexec.mainClass="annotator.Annotator" > out.json -Dexec.args="
 	}, {
 		"ID": 2,
 		"Question": "Where did the protestors plan to march to?"
-	}, {
-		"ID": 3,
-		"Question": "How many tents were there?"
 	}]
 }, {
 	"Topic Text": "The Occupy Denver movement began about 10 days after the New York protests began. By
@@ -53,9 +61,9 @@ mvn -q exec:java -Dexec.mainClass="annotator.Annotator" > out.json -Dexec.args="
 		"ID": 2,
 		"Question": "When was camping banned?"
 	}, {
-		"ID": 3,
-		"Question": "Who ordered the park to be closed?"
-	}]
+      "ID": 3,
+      "Question": "How many tents were there?"
+   }]
 }]
 ```
 
@@ -63,43 +71,187 @@ mvn -q exec:java -Dexec.mainClass="annotator.Annotator" > out.json -Dexec.args="
 
 
 ``` json
-[{
-	"topicID": 1,
-	"Hints": [{
-		"Highlights": ["DENVER", "Denver", "New York", "Wells Fargo", "16th Street Mall", "Denver", "Civic Center Park", "Denver"],
-		"Indices": [
-			[0, 6],
-			[16, 22],
-			[124, 132],
-			[220, 231],
-			[244, 260],
-			[264, 270],
-			[379, 396],
-			[628, 634]
-		],
-		"qID": 1
-	}, {
-		"Highlights": ["DENVER", "Denver", "New York", "Wells Fargo", "16th Street Mall", "Denver", "Civic Center Park", "Denver"],
-		"Indices": [
-			[0, 6],
-			[16, 22],
-			[124, 132],
-			[220, 231],
-			[244, 260],
-			[264, 270],
-			[379, 396],
-			[628, 634]
-		],
-		"qID": 2
-	}]
-}, {
-	"topicID": 2,
-	"Hints": [{
-		"Highlights": ["dozen people"],
-		"Indices": [
-			[529, 541]
-		],
-		"qID": 1
-	}]
-}]
+[
+  {
+    "topicID": 1,
+    "Hints": [
+      {
+        "Highlights": [
+          "DENVER",
+          "Denver",
+          "New York",
+          "Wells Fargo",
+          "16th Street Mall",
+          "Denver",
+          "Civic Center Park",
+          "Denver"
+        ],
+        "Indices": [
+          [
+            0,
+            6
+          ],
+          [
+            16,
+            22
+          ],
+          [
+            124,
+            132
+          ],
+          [
+            220,
+            231
+          ],
+          [
+            244,
+            260
+          ],
+          [
+            264,
+            270
+          ],
+          [
+            379,
+            396
+          ],
+          [
+            628,
+            634
+          ]
+        ],
+        "qID": 1
+      },
+      {
+        "Highlights": [
+          "DENVER",
+          "Denver",
+          "New York",
+          "Wells Fargo",
+          "16th Street Mall",
+          "Denver",
+          "Civic Center Park",
+          "Denver"
+        ],
+        "Indices": [
+          [
+            0,
+            6
+          ],
+          [
+            16,
+            22
+          ],
+          [
+            124,
+            132
+          ],
+          [
+            220,
+            231
+          ],
+          [
+            244,
+            260
+          ],
+          [
+            264,
+            270
+          ],
+          [
+            379,
+            396
+          ],
+          [
+            628,
+            634
+          ]
+        ],
+        "qID": 2
+      }
+    ]
+  },
+  {
+    "topicID": 2,
+    "Hints": [
+      {
+        "Highlights": [
+          "dozen people"
+        ],
+        "Indices": [
+          [
+            529,
+            541
+          ]
+        ],
+        "qID": 1
+      },
+      {
+        "Highlights": [
+          "about 10 days",
+          "October 2011",
+          "A few days later",
+          "October 12",
+          "October 14",
+          "winter",
+          "March",
+          "May"
+        ],
+        "Indices": [
+          [
+            33,
+            46
+          ],
+          [
+            3,
+            15
+          ],
+          [
+            0,
+            16
+          ],
+          [
+            3,
+            13
+          ],
+          [
+            79,
+            89
+          ],
+          [
+            38,
+            44
+          ],
+          [
+            8,
+            13
+          ],
+          [
+            3,
+            6
+          ]
+        ],
+        "qID": 2
+      },
+      {
+        "Highlights": [
+          "80 tents",
+          "the tents"
+        ],
+        "Indices": [
+          [
+            381,
+            389
+          ],
+          [
+            514,
+            523
+          ]
+        ],
+        "qID": 3
+      }
+    ]
+  }
+]
+
 ```
