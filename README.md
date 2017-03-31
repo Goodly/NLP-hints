@@ -15,7 +15,7 @@ treeTaggerHome = /Users/manishasharma/Desktop/temp-tagger/heideltime-standalone/
 #### Running Annotator.java.
 
 ```
-mvn compile
+mvn clean compile
 mvn -q exec:java -Dexec.mainClass="annotator.Annotator" > out.json -Dexec.args="in.json"
 ```
 
