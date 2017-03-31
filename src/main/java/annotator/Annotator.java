@@ -100,7 +100,9 @@ public class Annotator {
 		 * who question types.  */
 		
 		String type = getQuestionType(question);
-
+		if (type == null) {
+			return null;
+		}
 		
 		if (type.equals("Where")) {
 			return getLocations();
