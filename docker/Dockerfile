@@ -3,7 +3,7 @@ ENV PYTHONUNBUFFERED 1
 ENV TERM xterm
 
 # helpful aliases
-COPY bashrc_to_docker /root/.bashrc
+COPY ./docker/bashrc_to_docker /root/.bashrc
 
 # ARG vars exist only during build
 ARG DEBIAN_FRONTEND=noninteractive
@@ -37,15 +37,16 @@ RUN apt-get install -y --no-install-recommends maven
 RUN rm -rf /var/lib/apt/lists/*
 
 WORKDIR /home
-RUN git clone https://github.com/Goodly/NLP-hints nlp_hints
+COPY . nlp_hints
 WORKDIR /home/nlp_hints
+RUN rm -rf docker/
 RUN mvn clean compile
 
 WORKDIR /home/nlp_worker
-COPY ./requirements.txt .
+COPY ./docker/requirements.txt .
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
-COPY ./nlp_worker ./nlp_worker
+COPY ./docker/nlp_worker ./nlp_worker
 ENV PYTHONPATH=/home/nlp_worker
 
 # Maven wants to run in this dir
