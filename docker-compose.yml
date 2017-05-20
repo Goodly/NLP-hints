@@ -1,0 +1,9 @@
+version: '2'
+services:
+  nlp_hints:
+    image: teamforecast/nlp_hints:latest
+    depends_on:
+      - django_rq
+
+  django_rq:
+    image: redis:3.2.9
