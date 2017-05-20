@@ -25,14 +25,14 @@ RUN apt-get update -q
 RUN echo debconf shared/accepted-oracle-license-v1-1 select true | debconf-set-selections
 RUN echo debconf shared/accepted-oracle-license-v1-1 seen true | debconf-set-selections
 
-RUN apt-get install -y --no-install-recommends \
+RUN apt-get install -q -y --no-install-recommends \
         gcc build-essential \
         git-core curl less vim psmisc \
         redis-tools \
         oracle-java8-installer oracle-java8-set-default
 
 ENV JAVA_HOME="/usr/lib/jvm/java-8-oracle/jre"
-RUN apt-get install -y --no-install-recommends maven
+RUN apt-get install -q -y --no-install-recommends maven
 
 RUN rm -rf /var/lib/apt/lists/*
 
@@ -40,7 +40,7 @@ WORKDIR /home
 COPY / nlp_hints
 WORKDIR /home/nlp_hints
 RUN rm -rf docker/
-RUN mvn clean compile
+RUN mvn --batch-mode clean compile
 
 WORKDIR /home/nlp_worker
 COPY /docker/requirements.txt .
