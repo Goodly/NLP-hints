@@ -1,7 +1,9 @@
-version: '2'
+version: '3'
 services:
   nlp_hints:
-    image: teamforecast/nlp_hints:latest
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
     depends_on:
       - django_rq
 
